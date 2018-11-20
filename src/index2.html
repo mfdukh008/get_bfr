@@ -1,0 +1,147 @@
+<html>
+    <head>
+    	<h1>国办系统数据导出工具</h1>
+    	<h2>             --by RC</h2>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+            .form-wrapper {
+                width: 500px;
+                text-align: center;
+            }
+
+            .form-wrapper .list-input{
+                display: block;
+                margin: 0 auto;
+                padding: 10px;
+                width: 400px;
+                height: 500px;
+                line-height: 21px;
+                font-size: 14px;
+            }
+            
+            .form-wrapper .btn-submit{
+                display: inline-block;
+                margin-top: 15px;
+                width: 150px;
+                height: 30px;
+                line-height: 30px;
+                line-break: 30px;
+                text-align: center;
+                font-size: 16px;
+                color: #fff;
+                text-align: center;
+                border-radius: 4px;
+                background-color: rgb(69, 134, 237);
+            }
+
+            .box {
+            	width: 200px;
+            	height: 20px;
+            	background:#ccc;
+            	border-radius:10px;
+            	position:relative
+        	}
+
+        	.clip {
+            	position: absolute;
+           		width: 100%;
+            	height: 100%;
+            	clip: rect(0px,100px,20px,0px);
+            	background: red;
+            	border-radius:10px;
+        	}
+
+        </style>
+    </head>
+    <body>
+        <div class="form-wrapper">
+            <textarea placeholder="输入贫困户id" class="list-input" id="list-input"></textarea>
+            <span class="clip"></span>
+            <span class="btn-submit" id="btn-submit">查询</span>
+        </div>
+        <div class="box">
+        	<span class="clip"></span>
+        </div>
+        <div class="result-list" id="result-list"></div>
+        <script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript">
+            const inputParam = $('#list-input'),
+                btnSub = $('#btn-submit'),
+                eleResultList = $('#result-list');
+            
+            let valParamList,
+                listIndex = 0,
+                resultList = [];
+                resultList.push("户编号"+" "+"识别年度"+" "+"返贫原因"+" "+"是否通生活用电"+" "+"与村主干路距离"+" "+"有无卫生厕所"+" "+"耕地面积"+" "+"入户路类型"+" "+"住房面积"+" "+"工资性收入"+" "+"生产经营性收入"+" "+"转移性收入"+" "+"计划生育金"+" "+"低保金"+" "+"特困供养金"+" "+"养老保险金"+" "+"生态补偿金"+" "+"其他转移性收入"+" "+"其他财产性收入"+" "+"财产性收入"+" "+"生产性支出"+" "+"年收入"+" "+"纯收入"+" "+"项目类型"+" "+"贫困户属性");
+
+            const requestFn = {
+                doRequest() {
+                    const that = this;
+                    if (listIndex < valParamList.length) {
+                        $.ajax({
+                            type: 'get',
+                            // url: 'http://cpadisc7.cpad.gov.cn/cpad_new/api/common/doQuery',
+                            url: '/userInfoQuery',
+                            data: {
+                                id: valParamList[listIndex]
+                            },
+                            dataType: 'json',
+                            success: function (res) {
+                                // var resultString = res.body.BasicSituationList.data[0].aar041;
+                                // if(res.body.BasicSituationList.data[0].aac009){
+                                //     var resultString = res.body.BasicSituationList.data[0].aac009;
+                                //     resultList.push(resultString);
+                                // }else{
+                                //     var resultString = 100;
+                                //     resultList.push(resultString);
+                                // }
+                                // // if (resultString.length==null){
+                                // //     resultString = "no";
+                                // // },
+                                var resultMeasure = "NULL";
+                                var resultString = res.body.BasicSituationList.data[0];
+                                var resultData = res.body.MeasureList.data;
+                                if (resultData && resultData.length > 0) {
+                                    resultMeasure = resultData[0].ACR005;
+                                };
+                                resultList.push(resultString.aac001+" "+res.body.BasicSituationList.data[0].aar041+" "+resultString.aac009+" "+res.body.LivingConditionList.data[0].aac313+" "+res.body.LivingConditionList.data[0].aac315+" "+res.body.LivingConditionList.data[0].aac319+" "+res.body.LivingConditionList.data[0].aac301+" "+res.body.LivingConditionList.data[0].aac316+" "+res.body.LivingConditionList.data[0].aac317+" "+res.body.IncomeInfoList.data[0].aac073+" "+res.body.IncomeInfoList.data[0].aac071+" "+res.body.IncomeInfoList.data[0].aac085+" "+res.body.IncomeInfoList.data[0].aac076+" "+res.body.IncomeInfoList.data[0].aac077+" "+res.body.IncomeInfoList.data[0].aac086+" "+res.body.IncomeInfoList.data[0].aac087+" "+res.body.IncomeInfoList.data[0].aac078+" "+res.body.IncomeInfoList.data[0].aac083+" "+res.body.IncomeInfoList.data[0].aac093+" "+res.body.IncomeInfoList.data[0].aac072+" "+res.body.IncomeInfoList.data[0].aac074+" "+res.body.IncomeInfoList.data[0].aac081+" "+res.body.IncomeInfoList.data[0].aac079+" "+resultMeasure+" "+res.body.BasicSituationList.data[0].aac006);
+                                listIndex++;
+                                that.doRequest();
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                console.log(XMLHttpRequest.status);
+                                console.log(XMLHttpRequest.readyState);
+                                console.log(textStatus);
+                            }
+                        });
+                    } else {
+                        console.log(resultList);
+                        eleResultList.html(resultList.join('<br>'));
+                        return;
+                    }
+                },
+
+                bindBtnSub() {
+                    const that = this;
+                    console.log('ok0');
+                    btnSub.on('click', () => {
+                        console.log('ok');
+                        let valParam = inputParam.val();
+                        valParam = valParam.replace(/\r\n/g, '\n');
+                        valParamList = valParam.split('\n');
+                        resultList = [];
+
+                        that.doRequest();
+                    });
+                },
+
+                init() {
+                    console.log('test');
+                    const that = this;
+                    that.bindBtnSub();
+                }
+            };
+            requestFn.init();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,132 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+            body
+            {
+                /*background-image: url("image/timg.jpg") ;*/
+                /*background-repeat:no-repeat;*/
+                /*background-size: 100% 100%;*/
+                /*background-position:right top;*/
+
+            }
+            .form-wrapper {
+                width: 500px;
+                text-align: center;
+            }
+
+            .form-wrapper .list-input{
+                /*display: block;*/
+                margin: 0 auto;
+                padding: 10px;
+                width: 400px;
+                height: 500px;
+                line-height: 21px;
+                font-size: 14px;
+                resize: none;
+                background-color:transparent; 
+            }
+            
+            .form-wrapper .btn-submit{
+                display: inline-block;
+                margin-top: 15px;
+                width: 150px;
+                height: 30px;
+                line-height: 30px;
+                line-break: 30px;
+                text-align: center;
+                font-size: 16px;
+                color: #fff;
+                text-align: center;
+                border-radius: 4px;
+                background-color: rgb(69, 134, 237);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="form-wrapper">
+            <textarea placeholder="输入贫困户id" class="list-input" id="list-input"></textarea>
+            <span class="btn-submit" id="btn-submit">查询</span>
+        </div>
+        
+        <div class="result-list" id="result-list"></div>
+        <script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript">
+            const inputParam = $('#list-input'),
+                btnSub = $('#btn-submit'),
+                eleResultList = $('#result-list');
+            
+            let valParamList,
+                listIndex = 0,
+                resultList = [];
+                resultList.push("户编号"+" "+"识别年度"+" "+"返贫原因"+" "+"是否通生活用电"+" "+"与村主干路距离"+" "+"有无卫生厕所"+" "+"耕地面积"+" "+"入户路类型"+" "+"住房面积"+" "+"工资性收入"+" "+"生产经营性收入"+" "+"转移性收入"+" "+"计划生育金"+" "+"低保金"+" "+"特困供养金"+" "+"养老保险金"+" "+"生态补偿金"+" "+"其他转移性收入"+" "+"其他财产性收入"+" "+"财产性收入"+" "+"生产性支出"+" "+"年收入"+" "+"纯收入"+" "+"项目类型"+" "+"贫困户属性");
+
+            const requestFn = {
+                doRequest() {
+                    const that = this;
+                    if (listIndex < valParamList.length) {
+                        $.ajax({
+                            type: 'get',
+                            // url: 'http://cpadisc7.cpad.gov.cn/cpad_new/api/common/doQuery',
+                            url: '/userInfoQuery',
+                            data: {
+                                id: valParamList[listIndex]
+                            },
+                            dataType: 'json',
+                            success: function (res) {
+                                //
+                                // var resultMeasure = "NULL";
+                                // var resultString = res.body.BasicSituationList.data[0];
+                                // var resultData = res.body.MeasureList.data;
+                                // if (resultData && resultData.length > 0) {
+                                //     resultMeasure = resultData[0].ACR005;
+                                // };
+                                var renshu = res.body.TwinningList.data.length
+
+                                for (var i=0;i<renshu;i++)
+                                {
+                                    resultList.push(res.body.TwinningList.data[i].AAC001+";"+res.body.TwinningList.data[i].AAB002+";"+res.body.TwinningList.data[i].AAB003+";"+res.body.TwinningList.data[i].AAB004+";"+res.body.TwinningList.data[i].AAP001+";"+res.body.TwinningList.data[i].AAK039+";"+res.body.TwinningList.data[i].AAR020+";"+res.body.TwinningList.data[i].AAR021+";"+res.body.TwinningList.data[i].AAK037+";"+res.body.TwinningList.data[i].AAP004+";"+res.body.TwinningList.data[i].AAK033+";"+res.body.TwinningList.data[i].AAK036+";"+res.body.TwinningList.data[i].AAR012);
+                                }
+                                // resultList.push(resultString.aac001+" "+res.body.BasicSituationList.data[0].aar041+" "+resultString.aac009+" "+res.body.LivingConditionList.data[0].aac313+" "+res.body.LivingConditionList.data[0].aac315+" "+res.body.LivingConditionList.data[0].aac319+" "+res.body.LivingConditionList.data[0].aac301+" "+res.body.LivingConditionList.data[0].aac316+" "+res.body.LivingConditionList.data[0].aac317+" "+res.body.IncomeInfoList.data[0].aac073+" "+res.body.IncomeInfoList.data[0].aac071+" "+res.body.IncomeInfoList.data[0].aac085+" "+res.body.IncomeInfoList.data[0].aac076+" "+res.body.IncomeInfoList.data[0].aac077+" "+res.body.IncomeInfoList.data[0].aac086+" "+res.body.IncomeInfoList.data[0].aac087+" "+res.body.IncomeInfoList.data[0].aac078+" "+res.body.IncomeInfoList.data[0].aac083+" "+res.body.IncomeInfoList.data[0].aac093+" "+res.body.IncomeInfoList.data[0].aac072+" "+res.body.IncomeInfoList.data[0].aac074+" "+res.body.IncomeInfoList.data[0].aac081+" "+res.body.IncomeInfoList.data[0].aac079+" "+resultMeasure+" "+res.body.BasicSituationList.data[0].aac006);
+                                listIndex++;
+                                that.doRequest();
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                console.log(XMLHttpRequest.status);
+                                console.log(XMLHttpRequest.readyState);
+                                console.log(textStatus);
+                            }
+                        });
+                    } else {
+
+                        console.log(resultList);
+                        inputParam.value = "hello world";
+                        eleResultList.html(resultList.join('<br>'));
+                        return;
+                    }
+                },
+
+                bindBtnSub() {
+                    const that = this;
+                    console.log('ok0');
+                    btnSub.on('click', () => {
+                        console.log('ok');
+                        let valParam = inputParam.val();
+                        valParam = valParam.replace(/\r\n/g, '\n');
+                        valParamList = valParam.split('\n');
+                        resultList = [];
+
+                        that.doRequest();
+                    });
+                },
+
+                init() {
+                    console.log('test');
+                    const that = this;
+                    that.bindBtnSub();
+                }
+            };
+            requestFn.init();
+        </script>
+    </body>
+</html>
